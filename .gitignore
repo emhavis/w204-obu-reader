@@ -1,0 +1,27 @@
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# VS Code (keep recommended extensions)
+.vscode/*
+!.vscode/extensions.json
+
+# Build artifacts
+*.bin
+*.elf
+*.map
+
+# Captured data / logs (may contain VIN or vehicle data)
+logs/
+dumps/
+*.csv
+*.log
+
+# Secrets (WiFi passwords etc.)
+src/secrets.h
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
