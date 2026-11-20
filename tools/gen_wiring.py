@@ -76,7 +76,7 @@ def can(x0, keep):
         s += T(x0+75, 469, "120 Ω on board: keep", "badgetxt", "middle")
     else:
         s += f'<rect x="{x0+14}" y="456" width="122" height="18" rx="9" class="badge bad"/>'
-        s += T(x0+75, 469, "120 Ω on board: REMOVE", "badgetxt", "middle")
+        s += T(x0+75, 469, "onboard 120 Ω removed", "badgetxt", "middle")
     for x, n in zip(xs, CAN_P):
         s += f'<rect x="{x-4}" y="535" width="8" height="11" rx="1.5" class="pin on"/>'
         s += T(x+4, 529, n, "pcbtxt sm", "start", rot=-90)
@@ -134,7 +134,7 @@ def reader_board(fig2):
     s += wire([eL(x,"3V3"), (312, 134), (312, 62)], "c-3v3")
     s += wire([eR(x,"GND"), (462, 134), (462, 80)], "c-gnd")
     # transceiver
-    cs, cp = can(575, keep=not fig2)
+    cs, cp = can(575, keep=False)
     s += cs
     a = eR(x,"5"); s += wire([a, (548, a[1]), (548, 600), (cp["CTX"][0], 600), cp["CTX"]], "c-ctx")
     a = eR(x,"4"); s += wire([a, (556, a[1]), (556, 612), (cp["CRX"][0], 612), cp["CRX"]], "c-crx")
@@ -173,6 +173,10 @@ def fig1():
     s += wire([cp["CANH"], (cp["CANH"][0],735), (cp2["CANH"][0],735), cp2["CANH"]], "c-canh", 3)
     s += wire([cp["CANL"], (cp["CANL"][0],750), (cp2["CANL"][0],750), cp2["CANL"]], "c-canl", 3)
     s += T(930, 772, "CAN-H ↔ CAN-H, CAN-L ↔ CAN-L · twisted pair, 20–50 cm", "lbl b", "middle")
+    # plug-in 120 ohm across reader CANH/CANL (bench only)
+    s += wire([(cp["CANH"][0],578),(690,578)], "c-canh") + wire([(706,578),(cp["CANL"][0],578)], "c-canl")
+    s += '<rect x="689" y="572" width="18" height="12" rx="3" class="res"/>'
+    s += T(716, 582, "120 Ω plug-in", "lbl b")
     s += T(390, 632, "USB → PC", "lbl b", "middle")
     s += T(940, 632, "USB → PC", "lbl b", "middle")
     s += '</svg>'
@@ -249,6 +253,110 @@ def fig2():
     # VBAT sense run
     s += wire([(1006,200),(1006,24),(220,24),(220,120)], "c-sense")
     s += T(600, 18, "VBAT (after fuse + diode) → divider", "lbl b", "middle")
+    s += '</svg>'
+    return s
+
+
+def res_h(x1, x2, y, cls_l, cls_r, label=None, ly=None):
+    m = (x1+x2)/2
+    s = wire([(x1,y),(m-22,y)], cls_l) + wire([(m+22,y),(x2,y)], cls_r)
+    s += f'<rect x="{m-22}" y="{y-8}" width="44" height="16" rx="4" class="res"/>'
+    if label: s += T(m, ly if ly else y-14, label, "lbl b", "middle")
+    return s
+
+def res_v(x, y1, y2, label, sub=None, side="start"):
+    m = (y1+y2)/2
+    s = wire([(x,y1),(x,m-22)], "c-canh") + wire([(x,m+22),(x,y2)], "c-canl")
+    s += f'<rect x="{x-8}" y="{m-22}" width="16" height="44" rx="4" class="res"/>'
+    dx = 14 if side == "start" else -14
+    s += T(x+dx, m-2, label, "lbl b", side)
+    if sub: s += T(x+dx, m+13, sub, "lbl", side)
+    return s
+
+def fig3():
+    W, H = 1220, 780
+    s = f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="CAN termination. Bench: one 120 ohm resistor at each end of the bus, a plug-in one at the reader and the simulator board&apos;s own, measuring 60 ohm. Car: the car&apos;s bus already has its terminations, so the reader connects as a stub with no resistor. Close-up: the onboard 121 resistor is removed from the reader&apos;s transceiver and a through-hole 120 ohm resistor bridges the CANH and CANL breadboard strips.">'
+    # ---------- panel A: bench
+    s += '<rect x="20" y="40" width="570" height="260" rx="10" class="bb"/>'
+    s += T(20, 28, "A · Bench: one resistor at each end", "board-title")
+    s += '<rect x="44" y="96" width="92" height="124" rx="6" class="pcb-blue"/>'
+    s += T(90, 150, "READER", "pcbtxt b", "middle") + T(90, 166, "transceiver", "pcbtxt small", "middle")
+    s += '<rect x="474" y="96" width="92" height="124" rx="6" class="pcb-blue"/>'
+    s += T(520, 150, "SIMULATOR", "pcbtxt b", "middle") + T(520, 166, "transceiver", "pcbtxt small", "middle")
+    s += wire([(136,120),(474,120)], "c-canh", 3) + wire([(136,196),(474,196)], "c-canl", 3)
+    s += T(305, 112, "CAN-H", "lbl b", "middle") + T(305, 214, "CAN-L", "lbl b", "middle")
+    s += res_v(180, 120, 196, "120 Ω", "plug-in")
+    s += res_v(430, 120, 196, "120 Ω", "on board", "end")
+    s += '<rect x="185" y="246" width="240" height="34" rx="6" class="meter"/>'
+    s += T(305, 268, "CAN-H ↔ CAN-L ≈ 60 Ω  (120 ∥ 120)", "lbl b", "middle")
+    # ---------- panel B: car
+    s += '<rect x="630" y="40" width="570" height="260" rx="10" class="bb"/>'
+    s += T(630, 28, "B · Car: the bus is already terminated", "board-title")
+    s += '<rect x="652" y="80" width="510" height="150" rx="8" class="car-zone"/>'
+    s += T(907, 100, "inside the car (diagnostic CAN)", "lbl", "middle")
+    s += wire([(690,128),(1124,128)], "c-canh", 3) + wire([(690,196),(1124,196)], "c-canl", 3)
+    s += res_v(690, 128, 196, "built-in", None)
+    s += res_v(1124, 128, 196, "built-in", None, "end")
+    s += '<rect x="880" y="108" width="54" height="108" rx="4" class="obd"/>'
+    s += T(907, 166, "OBD", "pcbtxt b", "middle")
+    s += T(940, 124, "pin 6", "lbl") + T(940, 212, "pin 14", "lbl")
+    s += wire([(898,216),(898,252)], "c-canh") + wire([(916,216),(916,252)], "c-canl")
+    s += '<rect x="852" y="252" width="110" height="38" rx="6" class="pcb-blue"/>'
+    s += T(907, 268, "READER", "pcbtxt b", "middle") + T(907, 282, "no resistor", "pcbtxt small", "middle")
+    s += T(1000, 262, "OBD 6 ↔ 14 ≈ 60 Ω", "lbl b") + T(1000, 278, "(ignition off)", "lbl")
+    # ---------- panel C: close-up
+    s += T(20, 338, "C · Close-up: reader transceiver on the breadboard", "board-title")
+    s += '<rect x="20" y="350" width="1180" height="410" rx="10" class="bb"/>'
+    cols = [340 + 40*k for k in range(6)]
+    rows = [520 + 40*r for r in range(5)]
+    names = ["3V3","GND","CTX","CRX","CANH","CANL"]
+    # strips highlight for CANH / CANL
+    s += f'<rect x="{cols[4]-14}" y="{rows[0]-16}" width="28" height="{40*4+32}" rx="6" class="strip-h"/>'
+    s += f'<rect x="{cols[5]-14}" y="{rows[0]-16}" width="28" height="{40*4+32}" rx="6" class="strip-l"/>'
+    for c in range(0, 12):
+        x = 140 + 40*c
+        for r, y in enumerate(rows):
+            s += f'<rect x="{x-5}" y="{y-5}" width="10" height="10" rx="2" class="hole"/>'
+    for r, y in enumerate(rows):
+        s += T(118, y+4, "abcde"[r], "rail-lbl", "middle")
+    # module
+    s += f'<rect x="300" y="372" width="280" height="118" rx="8" class="pcb-blue"/>'
+    s += T(360, 400, "SN65HVD230", "pcbtxt b", "start")
+    s += '<rect x="330" y="414" width="44" height="30" rx="2" class="chip"/>'
+    for x, n in zip(cols, names):
+        s += f'<line x1="{x}" y1="490" x2="{x}" y2="{rows[0]}" class="leg"/>'
+        s += f'<rect x="{x-6}" y="478" width="12" height="12" rx="2" class="pin on"/>'
+        s += T(x, 472, n, "pcbtxt sm", "middle")
+    # SMD 121 on module + callout
+    s += '<rect x="506" y="420" width="24" height="12" rx="1.5" class="smd"/>'
+    s += T(518, 430, "121", "smdtxt", "middle")
+    s += '<circle cx="518" cy="426" r="20" class="callout"/>'
+    s += '<polyline points="538,420 640,392 664,392" class="callout-line" fill="none"/>'
+    s += T(670, 390, "① Onboard 120 Ω, marked 121.", "lbl b") + T(670, 406, "Remove it on the READER board only.", "lbl")
+    s += T(670, 422, "Hot iron on both pads and slide it off, or cut it.", "lbl")
+    # through-hole resistor across CANH / CANL strips (legs into row c)
+    hx, lx = cols[4], cols[5]
+    s += f'<line x1="{hx}" y1="{rows[2]}" x2="{hx-22}" y2="{rows[2]-22}" class="leg"/>'
+    s += f'<line x1="{lx}" y1="{rows[2]}" x2="{lx+22}" y2="{rows[2]-22}" class="leg"/>'
+    s += f'<rect x="{hx-26}" y="{rows[2]-32}" width="{lx-hx+52}" height="20" rx="8" class="res"/>'
+    for i, cls in enumerate(["band-br","band-rd","band-br","band-au"]):
+        bx = hx-14 + i*14 + (6 if i==3 else 0)
+        s += f'<rect x="{bx}" y="{rows[2]-32}" width="6" height="20" class="{cls}"/>'
+    s += '<polyline points="586,578 640,540 664,540" class="callout-line" fill="none"/>'
+    s += T(670, 538, "② Plug-in 120 Ω, one leg in the CANH strip,", "lbl b") + T(670, 554, "one leg in the CANL strip. Bench only.", "lbl")
+    s += T(670, 586, "③ In the car: pull it out. Nothing else changes.", "lbl b")
+    # wires out from row e
+    s += wire([(hx, rows[4]),(hx, 742)], "c-canh", 3) + wire([(lx, rows[4]),(lx, 742)], "c-canl", 3)
+    s += T(lx+14, 736, "CAN-H / CAN-L → simulator (bench) or OBD 6 / 14 (car)", "lbl b")
+    s += T(130, 742, "3V3 · GND · CTX · CRX: wired as in Figure 1", "lbl", "start")
+    s += T(670, 650, "Each column of holes a–e is one connected strip.", "lbl")
+    s += T(670, 666, "Shaded: the CANH and CANL strips.", "lbl")
+    # colour code
+    s += '<rect x="44" y="384" width="200" height="22" rx="10" class="res"/>'
+    for i, cls in enumerate(["band-br","band-rd","band-br","band-au"]):
+        s += f'<rect x="{84 + i*24 + (16 if i==3 else 0)}" y="384" width="9" height="22" class="{cls}"/>'
+    s += T(144, 428, "120 Ω, ¼ W", "lbl b", "middle") + T(144, 444, "brown · red · brown · gold", "lbl", "middle")
+    s += T(144, 460, "(1 %: brown red black black brown)", "lbl", "middle")
     s += '</svg>'
     return s
 
@@ -346,6 +454,17 @@ ol.checks{margin:0;padding-left:1.3rem;display:grid;gap:8px;max-width:80ch}
 .dsym{fill:var(--fg)}
 .dbar{stroke:var(--fg);stroke-width:2.4}
 .plug{fill:#2a2f33;stroke:#555f64}
+.meter{fill:var(--surface);stroke:var(--line)}
+.car-zone{fill:none;stroke:var(--muted);stroke-dasharray:5 4}
+.obd{fill:#2a2f33;stroke:#555f64}
+.strip-h{fill:var(--wch);opacity:.16} .strip-l{fill:var(--wcl);opacity:.16}
+.chip{fill:#15181a}
+.leg{stroke:#9aa3a8;stroke-width:2.2}
+.smd{fill:#15181a;stroke:#9aa3a8}
+.smdtxt{font:600 8px var(--f-mono);fill:#e8eef0}
+.callout{fill:none;stroke:var(--bad);stroke-width:2.2;stroke-dasharray:4 3}
+.callout-line{stroke:var(--muted);stroke-width:1.2}
+.band-br{fill:#7a4a1e} .band-rd{fill:#c62828} .band-au{fill:#c9a227}
 """
 
 LEG = [("3V3","--w3"),("5V","--w5"),("+12 V (car)","--w12"),("GND","--wg"),("TFT SPI","--wtft"),("SD SPI","--wsd"),
@@ -404,7 +523,7 @@ page = f"""<!doctype html>
   <h2>Figure 1 · Bench: reader + simulator</h2>
   <figure>
     <div class="scroll">{fig1()}</div>
-    <figcaption>Both ESP32s run from PC USB. The two transceivers connect CAN-H to CAN-H and CAN-L to CAN-L, and the GND rails are linked. Keep the 120 Ω resistor on both transceiver boards: together they terminate the bench bus. With power off you should measure about 60 Ω between CAN-H and CAN-L.</figcaption>
+    <figcaption>Both ESP32s run from PC USB. The two transceivers connect CAN-H to CAN-H and CAN-L to CAN-L, and the GND rails are linked. The reader's transceiver has its onboard 120 Ω removed and gets a plug-in 120 Ω on the breadboard. The simulator keeps its onboard one. Together they terminate the bench bus: with power off you should measure about 60 Ω between CAN-H and CAN-L (see Figure 3).</figcaption>
   </figure>
 </section>
 
@@ -412,7 +531,15 @@ page = f"""<!doctype html>
   <h2>Figure 2 · Reader in the car</h2>
   <figure>
     <div class="scroll">{fig2()}</div>
-    <figcaption>The faded parts are wired exactly as in Figure 1. What's new: OBD-II pin 16 feeds the protected 12 V supply into the LM2596, whose USB output powers the ESP32. Pins 6 and 14 go to the transceiver. A 100 kΩ / 22 kΩ divider brings the battery voltage to GPIO35 (14.4 V reads as about 2.6 V). The car's bus is already terminated, so <strong>remove the 120 Ω resistor</strong> from the reader's transceiver.</figcaption>
+    <figcaption>The faded parts are wired exactly as in Figure 1. What's new: OBD-II pin 16 feeds the protected 12 V supply into the LM2596, whose USB output powers the ESP32. Pins 6 and 14 go to the transceiver. A 100 kΩ / 22 kΩ divider brings the battery voltage to GPIO35 (14.4 V reads as about 2.6 V). The car's bus is already terminated, so <strong>pull out the plug-in 120 Ω resistor</strong>. The reader's onboard one is already removed (Figure 3).</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>Figure 3 · CAN termination (120 Ω)</h2>
+  <figure>
+    <div class="scroll">{fig3()}</div>
+    <figcaption>A CAN bus needs exactly one 120 Ω resistor at each end, which measures 60 Ω across CAN-H and CAN-L. On the bench the reader and simulator are the two ends. In the car the bus already has its own, so the reader must add none. Removing the reader's onboard resistor once and using a plug-in one on the bench makes switching between the two a matter of pulling one part.</figcaption>
   </figure>
 </section>
 
@@ -431,7 +558,7 @@ page = f"""<!doctype html>
   <h2>Before you power up</h2>
   <ol class="checks">
     <li><strong>Bench first.</strong> Get the reader talking to the simulator (Figure 1) before you plug anything into the car.</li>
-    <li><strong>Termination.</strong> Most SN65HVD230 boards have a 120 Ω resistor marked <code>121</code>. Bench: keep it on both boards. Car: lift or cut it on the reader's board. Check with a meter: about 60 Ω across CAN-H/CAN-L on the bench, and about 60 Ω at the car's OBD pins 6–14 with the ignition off.</li>
+    <li><strong>Termination (Figure 3).</strong> Most SN65HVD230 boards have a 120 Ω resistor marked <code>121</code>. Remove it from the reader's board once. Use a plug-in 120 Ω on the bench and pull it out for the car. The simulator keeps its own. Check with a meter: about 60 Ω across CAN-H/CAN-L on the bench, and about 60 Ω at the car's OBD pins 6–14 with the ignition off.</li>
     <li><strong>Test the power section on its own.</strong> Feed it 12–14 V from a bench supply or the car with no ESP32 connected. Check for 5.0 V on the LM2596's USB output before you plug the ESP32 in.</li>
     <li><strong>One power source at a time.</strong> In the car the ESP32's USB port is taken by the LM2596 cable. To watch serial logs in the car, unplug that cable and use the laptop's USB instead, with the laptop on battery.</li>
     <li><strong>Boot pins.</strong> GPIO2 (TFT DC) and GPIO15 (TFT CS) are ESP32 boot-strap pins. They work with the TFT attached, but if flashing ever fails, unplug the TFT and retry. GPIO12 is deliberately unused, because pulling it high at boot breaks startup.</li>

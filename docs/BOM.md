@@ -32,7 +32,7 @@ This list replaces 8 shipments with **4 online sellers plus one trip to a local 
 | ☐ | microSD SPI module | 1 | ~8.500 | 8.500 | R9 | Ask seller |
 | ☐ | Breadboard 830 + jumper wires (M-M, M-F) | 1 set | ~30.000 | 30.000 | S3 | Ask seller |
 | ☐ | Perfboard, pin headers, JST connectors, hook-up wire | 1 set | ~25.000 | 25.000 | R13 | Ask seller |
-| ☐ | Resistors 100 kΩ + 22 kΩ, 100 nF caps, 470 µF/35 V cap | 1 set | ~5.000 | 5.000 | R11 | Ask seller |
+| ☐ | Resistors 100 kΩ + 22 kΩ + 120 Ω ×2 (CAN bench termination), 100 nF caps, 470 µF/35 V cap | 1 set | ~5.000 | 5.000 | R11 | Ask seller |
 | ☐ | TVS diode P6KE24A (or SMBJ24A) | 2 | ~3.000 | 6.000 | R6 | Ask seller |
 | ☐ | Schottky diode 1N5822 (or SS34) | 1 | ~2.000 | 2.000 | R7 | Ask seller |
 | | **Order subtotal** | | | **252.400** | | |
@@ -105,7 +105,7 @@ Use Tokopedia chat to ask **cncstorebandung**: *"Ada SN65HVD230 CAN module? Ada 
 | R8 | TFT display | 2.8" ILI9341 SPI, 240×320, XPT2046 resistive touch | 1 | 216.000 | 216.000 | Listed | [klinikrasid](https://www.tokopedia.com/klinikrasid/lcd-tft-touchscreen-2-8-in-spi-serial-ili9341-240-320-for-arduino) |
 | R9 | microSD module | SPI, with onboard level shifter / 3.3 V regulator | 1 | 8.500 | 8.500 | Listed | [tekno-kreasi-elektronik](https://www.tokopedia.com/tekno-kreasi-elektronik/micro-sd-card-module-spi-arduino-welded) · alt: [cncstorejogja](https://www.tokopedia.com/cncstorejogja/cnc-micro-sd-card-spi-module-microsd) |
 | R10 | microSD card | 32 GB SanDisk Ultra (SDHC, formats as FAT32) | 1 | 75.000 | 75.000 | Listed | [stardisc89](https://www.tokopedia.com/stardisc89/sandisk-ultra-microsd-32gb-class-10-no-adapter-original) · upgrade: [High Endurance 32 GB, Rp235.000](https://www.tokopedia.com/genzymart/sandisk-high-endurance-microsdhc-card-100mb-s-32gb-sdsqqnr-032g-gn6ia) |
-| R11 | 12 V sense divider + passives | 100 kΩ + 22 kΩ resistors (12 V → ADC), 100 nF caps, 470 µF/35 V cap on buck input | 1 set | ~5.000 | 5.000 | Est. | search "resistor 1/4 watt" / "elco 470uF 35V" |
+| R11 | 12 V sense divider + passives | 100 kΩ + 22 kΩ resistors (12 V → ADC), 120 Ω ×2 (plug-in CAN termination for the bench, one spare), 100 nF caps, 470 µF/35 V cap on buck input | 1 set | ~5.000 | 5.000 | Est. | search "resistor 1/4 watt" / "elco 470uF 35V" |
 | R12 | Enclosure | ABS project box, ~100 × 60 × 25 mm, with a cut-out for the TFT | 1 | ~25.000 | 25.000 | Est. | search "box project ABS hitam" / "kotak elektronik plastik" |
 | R13 | Build hardware | Perfboard (PCB lubang), pin headers, JST connectors, hook-up wire, heat-shrink | 1 set | ~25.000 | 25.000 | Est. | search "PCB lubang" / "konektor JST" |
 | | **Reader subtotal** | | | | **551.299** | | |
