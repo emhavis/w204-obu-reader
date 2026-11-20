@@ -1,6 +1,8 @@
 # W204 ESP32 Sensor Reader — Plan
 
 ## Context
+**Primary goal (updated 2026-11-20):** make a **complete, guided scan** of the car's sensors and fault codes, save it to the SD card, and bring it to Claude Code. Claude analyzes it and writes a **preventive maintenance report**. The scan procedure, file format and analysis rules are in [SCAN.md](SCAN.md). The live display and dashboard are now secondary: they guide the scan steps.
+
 Build a sensor reader for a Mercedes-Benz W204 (C-Class 2007–2014) on an ESP32. It plugs straight into the OBD-II port (500 kbps diagnostic CAN on pins 6 and 14). It reads generic OBD-II data first, then Mercedes-specific module data over KWP2000/UDS. Results show on an onboard TFT screen, on a phone web dashboard over the ESP32's own WiFi network, and are logged to an SD card. The project folder is empty, so everything is new.
 
 **Feasibility:** Yes. The ESP32 has a built-in CAN controller (TWAI) and needs only a 3.3 V transceiver. Generic OBD-II is well documented. The risk is in the Mercedes-specific data: the ECU addresses and data identifiers (DIDs) are not public. We find them by sniffing a scan tool session or from community sources. That is why it is a separate phase.
@@ -44,10 +46,13 @@ Tasks: `canTask` (core 0) runs the polling scheduler over `signals.h`, schedulin
 
 ## Phases
 1. **CAN bring-up:** TWAI driver, then a test with the bench simulator, then in-car **listen-only** sniffing, logging raw frames to SD.
-2. **Generic OBD-II:** ISO-TP layer, Mode 01 PIDs (RPM, speed, coolant, IAT, load, MAF, throttle, fuel trims, module voltage), reading and clearing DTCs, VIN.
-3. **Outputs:** TFT gauge pages, phone web dashboard over WebSocket, CSV logging to SD.
-4. **Mercedes-specific:** generic KWP/UDS read client. Find ECU request/response IDs by sniffing a scan tool (Xentry, iCarsoft MB, Carly, etc.) talking to the car. Fill `signals.h` with confirmed DIDs: transmission oil temperature (722.6/722.9), engine oil temperature and level, and per-module DTCs (SAM, EIS, ESP, SRS). Add a tooling script (`tools/decode_dump.py`) to analyze the raw dumps.
-5. **Power and enclosure:** sleep and wake on CAN activity or ignition voltage, so the reader doesn't drain the battery.
+2. **Generic OBD-II, full coverage:** ISO-TP layer. Discover supported PIDs and poll **all** of them, using multi-PID requests. Read freeze frames (Mode 02), stored / pending / permanent DTCs (03 / 07 / 0A), on-board monitor results (06), and VIN / calibration IDs (09). Clearing DTCs stays behind the confirmation rule.
+3. **Guided scan + export:** scan wizard on the web UI (steps S0–S7 in [SCAN.md](SCAN.md)), session folder on SD (`session.json`, `dtc.json`, `readiness.json`, `mode06.json`, `live.csv`), download from the web UI. Simulator generates sample scans with injected faults.
+4. **Analysis tooling:** `tools/analyze_scan.py` computes per-step statistics, applies the rules in SCAN.md §5 and writes `summary.json`. Claude turns it into `report.md` with the maintenance plan. Tune thresholds on the first real scans of this car.
+5. **Mercedes-specific:** generic KWP/UDS read client. Find ECU request/response IDs by sniffing a scan tool (Xentry, iCarsoft MB, Carly, etc.) talking to the car. Fill `signals.h` with confirmed DIDs: transmission oil temperature (722.6/722.9), engine oil temperature and level, and per-module DTCs (SAM, EIS, ESP, SRS). Add a tooling script (`tools/decode_dump.py`) to analyze the raw dumps.
+   This phase extends the scan to every module the gateway exposes: per-module fault codes in `dtc.json`, and the extra values as columns in `live.csv`.
+6. **Outputs polish:** TFT gauge pages, live web dashboard.
+7. **Power and enclosure:** sleep and wake on CAN activity or ignition voltage, so the reader doesn't drain the battery.
 
 ## Safety rules (enforced in code)
 - Read-only diagnostic services only. No coding, routine control, IO control or write services. Use a whitelist in `mb_diag`.

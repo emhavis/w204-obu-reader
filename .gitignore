@@ -25,3 +25,6 @@ src/secrets.h
 .DS_Store
 Thumbs.db
 *.swp
+
+# Scan sessions (contain the VIN)
+scans/
