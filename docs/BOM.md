@@ -66,6 +66,16 @@ The listing sells both 2.4" and 2.8". Pick the **2.8"** variant and check that i
 | ☐ | ABS project box ~100 × 60 × 25 mm | 1 | ~25.000 | R12 | Electronics shop |
 | | **Local subtotal** | | **110.000** | | |
 
+### Optional: 12 V bench test (not in the total)
+
+Only needed if you want to test the power section (fuse, TVS, Schottky, LM2596) on the desk before the car. Add these to the cncstorebandung order if they stock them (ask in chat), or buy them at the local shop.
+
+| ✓ | Item | Qty | Est. (Rp) | For | Where |
+|---|---|---|---|---|---|
+| ☐ | 12 V 2 A DC adapter (5.5 × 2.1 mm barrel plug) | 1 | ~35.000 | O1 | search "adaptor 12V 2A" |
+| ☐ | Female DC jack to screw terminal (5.5 × 2.1 mm) | 1 | ~5.000 | O2 | search "DC jack female terminal" |
+| | **Optional subtotal** | | **~40.000** | | |
+
 ### Total
 
 | Order | Rp |
@@ -120,6 +130,18 @@ A second ESP32 plays the car's ECU on your desk. You can test the firmware witho
 | S2 | CAN transceiver | Same as R2 | 1 | 25.300 | 25.300 | Listed | Same as R2 |
 | S3 | Breadboard + jumper wires | 830-point breadboard, M-M and M-F jumpers | 1 set | ~30.000 | 30.000 | Est. | search "breadboard 830 + kabel jumper" |
 | | **Simulator subtotal** | | | | **124.299** | | |
+
+## 2b. Optional: 12 V bench test
+
+For testing the in-car power section on the desk, without the car. The bench setup itself (Figure 1 in [wiring.html](wiring.html)) runs from PC USB and doesn't need this. The free alternative is to test the power section in the car with the ESP32 unplugged and check for 5.0 V at the LM2596's USB output.
+
+| # | Part | Spec | Qty | Unit (Rp) | Subtotal (Rp) | Status | Where to buy |
+|---|---|---|---|---|---|---|---|
+| O1 | 12 V DC adapter | 12 V, 2 A, 5.5 × 2.1 mm barrel plug. Feeds the power section in place of OBD pin 16 / GND | 1 | ~35.000 | 35.000 | Est. | search "adaptor 12V 2A" |
+| O2 | Female DC jack terminal | 5.5 × 2.1 mm female jack with screw terminals (+ / −), to connect the adapter to the fuse input and GND bus | 1 | ~5.000 | 5.000 | Est. | search "DC jack female terminal" |
+| | **Optional subtotal** (not in the totals below) | | | | **~40.000** | | |
+
+**How to use it:** connect the jack's **+** to the fuse input (where OBD pin 16 goes), and **−** to the GND bus (where pins 4/5 go). Leave the ESP32 unplugged, power up, and check for 5.0 V at the LM2596 USB output. Then unplug the adapter before connecting the OBD plug. Never connect both at once. An adapter can't test the 14.4 V charging voltage or overvoltage cases. Only an adjustable bench supply can (Rp 300k+, not needed).
 
 ## 3. Totals
 
