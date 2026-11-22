@@ -1,0 +1,3 @@
+code,module,description,source,first_seen,notes
+P2004,ME,Intake manifold runner control stuck open (bank 1),SAE J2012 generic,,M272 intake runner flap; check the flap linkage and lever
+P0016,ME,Crankshaft/camshaft position correlation (bank 1 sensor A),SAE J2012 generic,,M272: check the camshaft solenoid for an oil leak into the connector

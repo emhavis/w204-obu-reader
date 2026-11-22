@@ -51,6 +51,12 @@ Tasks: `canTask` (core 0) runs the polling scheduler over `signals.h`, schedulin
 4. **Analysis tooling:** `tools/analyze_scan.py` computes per-step statistics, applies the rules in SCAN.md §5 and writes `summary.json`. Claude turns it into `report.md` with the maintenance plan. Tune thresholds on the first real scans of this car.
 5. **Mercedes-specific:** generic KWP/UDS read client. Find ECU request/response IDs by sniffing a scan tool (Xentry, iCarsoft MB, Carly, etc.) talking to the car. Fill `signals.h` with confirmed DIDs: transmission oil temperature (722.6/722.9), engine oil temperature and level, and per-module DTCs (SAM, EIS, ESP, SRS). Add a tooling script (`tools/decode_dump.py`) to analyze the raw dumps.
    This phase extends the scan to every module the gateway exposes: per-module fault codes in `dtc.json`, and the extra values as columns in `live.csv`.
+   **Fault-code descriptions.** Mercedes does not sell its fault-code database as a file. The official texts exist only inside Xentry.
+   - **Lookup order:** local table `tools/dtc/dtc_local.csv` (git-ignored) → generic SAE J2012 text → `unknown`. Format and setup are in [tools/dtc/README.md](../tools/dtc/README.md).
+   - **Filling the local table:** during splitter sessions (aftermarket MB scanner and the reader on the same port), write down the description the scanner shows for each code.
+   - **Licensed text stays local.** Never commit text copied from WIS, Xentry or a commercial scanner, because the repo is public. Only generic codes in our own words go in `dtc_local.example.csv`.
+   - **Official sources:** Mercedes-Benz B2B Connect (b2bconnect.mercedes-benz.com) sells time-based WIS repair-information passes and XENTRY licences. Check whether Indonesia is supported, or ask Mercedes-Benz Indonesia after-sales. Before buying XENTRY Pass Thru, confirm it covers a 2009 W204. Avoid pirated WIS/EPC/Xentry downloads.
+   - **Optional hardware:** an OBD splitter cable and an aftermarket MB scanner (iCarsoft MB or Autel). Both are needed to sniff module addresses and fault-code texts.
 6. **Outputs polish:** TFT gauge pages, live web dashboard.
 7. **Power and enclosure:** sleep and wake on CAN activity or ignition voltage, so the reader doesn't drain the battery.
 

@@ -28,3 +28,7 @@ Thumbs.db
 
 # Scan sessions (contain the VIN)
 scans/
+
+# Local fault-code descriptions (may hold licensed text from WIS/Xentry/scanners; never commit)
+tools/dtc/dtc_local.csv
+!tools/dtc/dtc_local.example.csv
